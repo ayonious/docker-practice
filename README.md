@@ -1,58 +1,129 @@
 # docker-practice
 
-## Express Service
+A multi-service application demonstrating Docker containerization with Node.js (Express) and Spring Boot services.
 
-A simple REST API built with Express.js and containerized with Docker.
+## Architecture
 
-### Running with Docker Compose
+This project consists of two microservices:
 
+1. **Express Service** (Node.js) - Port 3000
+   - REST API for user management
+   - Proxies product requests to Spring Boot service
+   - Endpoints: `/api/users`, `/api/products`
 
-### Docker installation
+2. **Spring Boot Service** (Java) - Port 8080
+   - REST API for product management
+   - Endpoints: `/api/products`, `/api/health`
 
-- Download docker from docker website and keep it running
-- Make sure you have docker-compose installed 
-   `brew install docker-compose`
+The Express service calls the Spring Boot service to fetch product data, demonstrating inter-service communication.
 
-### Run the project
+## Prerequisites
 
-1. Navigate to the service directory:
+- Download Docker from docker website and keep it running
+- Make sure you have docker-compose installed:
    ```bash
-   cd express-service
+   brew install docker-compose
    ```
 
-2. Start the service:
-   ```bash
-   docker-compose up
-   ```
+## Quick Start with Makefile
 
-If this gives error like port already in use:
-   ```
-   lsof -i :3000
-   kill {processNo}
-   ```
+The project includes a Makefile with convenient shortcuts:
 
-   To run in detached mode:
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+make build     # Build all Docker images
+make up        # Start all services
+make down      # Stop all services
+make restart   # Restart all services
+make logs      # View logs from all services
+make clean     # Remove all containers, images, and volumes
+make test      # Run tests for Express service
+```
 
-3. The service will be available at `http://localhost:3000`
+## Manual Docker Compose Commands
 
-4. Check service health:
-   ```bash
-   curl http://localhost:3000/health
-   ```
+### Start both services:
+```bash
+docker-compose up
+```
 
-5. Stop the service:
-   ```bash
-   docker-compose down
-   ```
+To run in detached mode:
+```bash
+docker-compose up -d
+```
 
-### Environment Variables
+### Stop the services:
+```bash
+docker-compose down
+```
 
+### View logs:
+```bash
+docker-compose logs -f
+```
+
+## API Endpoints
+
+### Express Service (http://localhost:3000)
+
+**User endpoints:**
+- `GET /api/users` - Get all users
+- `GET /api/users/:id` - Get user by ID
+- `POST /api/users` - Create new user (body: `{name, email}`)
+
+**Product endpoints (proxied to Spring Boot):**
+- `GET /api/products` - Get all products
+- `GET /api/products/:id` - Get product by ID
+- `POST /api/products` - Create new product (body: `{name, price}`)
+
+**Health check:**
+- `GET /health`
+
+### Spring Boot Service (http://localhost:8080)
+
+- `GET /api/products` - Get all products
+- `GET /api/products/:id` - Get product by ID
+- `POST /api/products` - Create new product
+- `GET /api/health` - Health check
+
+## Testing
+
+Test the services with curl:
+
+```bash
+# Check Express service health
+curl http://localhost:3000/health
+
+# Get users from Express
+curl http://localhost:3000/api/users
+
+# Get products (Express proxies to Spring Boot)
+curl http://localhost:3000/api/products
+
+# Create a product via Express
+curl -X POST http://localhost:3000/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Monitor","price":299.99}'
+```
+
+## Troubleshooting
+
+If you get a "port already in use" error:
+```bash
+# For port 3000
+lsof -i :3000
+kill {processNo}
+
+# For port 8080
+lsof -i :8080
+kill {processNo}
+```
+
+## Environment Variables
+
+**Express Service:**
 - `NODE_ENV`: Set to `production` by default
 - `PORT`: Service port (default: 3000)
+- `SPRINGBOOT_SERVICE_URL`: URL of Spring Boot service (default: http://springboot-service:8080)
 
-### Health Check
-
-The service includes a health check endpoint that runs every 30 seconds with a 40-second startup grace period.
+**Spring Boot Service:**
+- `SPRING_PROFILES_ACTIVE`: Set to `prod` by default
