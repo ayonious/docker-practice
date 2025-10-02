@@ -6,6 +6,15 @@ A simple REST API built with Express.js and containerized with Docker.
 
 ### Running with Docker Compose
 
+
+### Docker installation
+
+- Download docker from docker website and keep it running
+- Make sure you have docker-compose installed 
+   `brew install docker-compose`
+
+### Run the project
+
 1. Navigate to the service directory:
    ```bash
    cd express-service
@@ -14,6 +23,12 @@ A simple REST API built with Express.js and containerized with Docker.
 2. Start the service:
    ```bash
    docker-compose up
+   ```
+
+If this gives error like port already in use:
+   ```
+   lsof -i :3000
+   kill {processNo}
    ```
 
    To run in detached mode:
