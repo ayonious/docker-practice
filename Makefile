@@ -29,4 +29,4 @@ clean:
 	docker-compose down -v --rmi all
 
 test:
-	cd express-service && npm test
+	cd express-service && yarn test
